@@ -8,7 +8,7 @@ function [Prs_shapiro_hi] = Compute_Shapiro_upper(rho_min, rho_max, Nx)
     
     rx = linspace(rho_min, rho_max, Nx); 
     % third, P_s/P_c = 1/P_c
-    Psu = 1 + 3*(rx.^2)/2 + (3*pi*rx/4); 
-
+    Prs_shapiro_hi = 1 + 3*(rx.^2)/2 + (3*pi*rx/4); 
+    Prs_shapiro_hi = Prs_shapiro_hi(:); 
 
 end

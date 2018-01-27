@@ -26,42 +26,44 @@ for loop = 1:length(time_vec)
     [prs, rx]  = Compute_Prs(b, rmin(loop), rmax(loop), Nx);
     pgrd = computeGRD(rx, b, rmin(loop)); 
     pin = Compute_Pin(rx).*pgrd; 
-    [pshaplo, ~, pshaphi] = Compute_Ps_Shapiro(rx); 
+    [pshaplo] = Compute_Shapiro_lower(rx);  
     Rx(:,loop) = rx.*at(loop); 
     Prs(:,loop) = prs./at(loop); 
     Pin(:,loop) = pin./at(loop);
     Pshap_lo(:,loop) = pshaplo.*pgrd./at(loop); 
-    Pshap_hi(:,loop) = pshaphi.*pgrd./at(loop); 
 end
 
 % integrate over time
 [Frs,RX] = compute_timeintegrated_prs(Rx,Prs,times); 
 [Fin] = compute_timeintegrated_prs(Rx,Pin,times); 
 [Fshap_lo] = compute_timeintegrated_prs(Rx,Pshap_lo,times); 
-[Fshap_hi] = compute_timeintegrated_prs(Rx,Pshap_hi,times); 
 
-% convert the pdf to magnitude
+% convert the pdfs to magnitude
 [mx,fMx] = rspdf2mwpdf(RX, Frs, dtau, c);
 [~,fin] = rspdf2mwpdf(RX, Fin, dtau, c);
 [~,fshap_lo] = rspdf2mwpdf(RX, Fshap_lo, dtau, c);
-[~,fshap_hi] = rspdf2mwpdf(RX, Fshap_hi, dtau, c);
 
-% normalize and plot
-Prs_norm = Prs./repmat(max(Prs), size(Prs, 1), 1); 
-Rxm = rs2mw(Rx); 
-cs = varycolor(length(days2plot)); 
-fMx_norm = fMx./max(fMx); 
-fMx_norm(1) = []; 
-fMx_norm = [fMx_norm; 0]; 
-semilogy(mx, fMx_norm, 'color', cs(oloop,:))
-hold on
-ylim([1e-4, 1])
-xlim([0.5, ceil(max(mx))])
+% Shapiro upper end-member model
+rmin_full = mw2rs(Mc, dtau, c); 
+rmax_full = mw2rs(Mmax, dtau, c); 
+pshaphi = Compute_Shapiro_upper(rmin_full, rmax_full, Nx); 
+Pshap_hi = pshaphi.*computeGRD(mw2rs(mx, dtau, c), b, rmin_full); 
+[~,fshap_hi] = rspdf2mwpdf(RX, Pshap_hi, dtau, c);
 
-
+% GRD
 y = 10.^(-b*mx); 
 y= y(:)./max(y);
+
+
+figure; 
+semilogy(mx, fin./max(fin))
+hold on
+semilogy(mx, fshap_lo./max(fshap_lo))
 semilogy(mx, y, '--k')
+semilogy(mx, fMx./max(fMx))
+semilogy(mx, fshap_hi./max(fshap_hi))
+ylim([1e-4, 1])
+xlim([Mc, max(mx)])
 xlabel('Magnitude')
 ylabel('Relative Frequency')
 title(['Time-integrated FMDs for b = ', num2str(b)])

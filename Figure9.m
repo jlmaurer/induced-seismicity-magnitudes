@@ -1,63 +1,64 @@
 %% Script to generate figures from Maurer & Segall, Fig. 8
 
-% specify b-value as 1 or 1.4 to replicate Fig 8a or b, respectively
+% parameters
 b = 1; 
-
-% other parameters
 Mmax = 5; 
 Mc = 0; 
 dtau = 3e6;         % stress drop
 c = 7*pi/16;        % geometrical constant for stress drop
-kf = .01;           % diffusivity
+kf = .1;           % diffusivity
 Neq = 1e3;          % number of earthquakes at each time step
-
-% discretize in time, Mw
 Nx = 500; 
 Nt = 2000; 
 
-% compute a(t) for the range of times needed
-% days2plot = [2:2:10, 20, 30, 50];
-% use r = 100 m
+% time in seconds at r = 100 m
 tfinal = (100/2)^2 / kf; 
-nsec = 24*3600;     % seconds in a day
-time_vec = linspace(1, tfinal*nsec, Nt); 
+time_vec = linspace(3600, tfinal, Nt); 
+
+% compute a(t) for the range of times needed
 at = 2*sqrt(kf*time_vec); 
 rmin = mw2rs(Mc, dtau, c)./at; 
 rmax = mw2rs(Mmax, dtau, c)./at; 
 
-for oloop = 1:length(days2plot)
-    tplot = days2plot(oloop)*nsec;
-    tindex = time_vec <= tplot;
-    times = time_vec(tindex); 
-    
-    % Compute P(r_s) for each time
-    [Rx, Prs, Pin] = deal(zeros(Nx, sum(tindex))); 
-    for loop = 1:sum(tindex)
-        [prs, rx]  = Compute_Prs(b, rmin(loop), rmax(loop), Nx);
-        pin = Compute_Pin(rx, b, rmin(loop), 1); 
-        Rx(:,loop) = rx.*at(loop); 
-        Prs(:,loop) = prs./at(loop); 
-        Pin(:,loop) = pin./at(loop); 
-    end
-
-    % integrate over time
-    [Prs_tot,RX] = compute_timeintegrated_prs(Rx,Prs,times); 
-
-    % convert the pdf to magnitude
-    [mx,fMx] = rspdf2mwpdf(RX, Prs_tot, dtau, c);
-
-    % normalize and plot
-    Prs_norm = Prs./repmat(max(Prs), size(Prs, 1), 1); 
-    Rxm = rs2mw(Rx); 
-    cs = varycolor(length(days2plot)); 
-    fMx_norm = fMx./max(fMx); 
-    fMx_norm(1) = []; 
-    fMx_norm = [fMx_norm; 0]; 
-    semilogy(mx, fMx_norm, 'color', cs(oloop,:))
-    hold on
-    ylim([1e-4, 1])
-    xlim([0.5, ceil(max(mx))])
+% Compute P(r_s) for each time
+[Rx, Prs, Pin, Pshap_lo, Pshap_hi] = deal(zeros(Nx, sum(tindex))); 
+for loop = 1:length(time_vec)
+    [prs, rx]  = Compute_Prs(b, rmin(loop), rmax(loop), Nx);
+    pgrd = computeGRD(rx, b, rmin(loop)); 
+    pin = Compute_Pin(rx).*pgrd; 
+    [pshaplo, ~, pshaphi] = Compute_Ps_Shapiro(rx); 
+    Rx(:,loop) = rx.*at(loop); 
+    Prs(:,loop) = prs./at(loop); 
+    Pin(:,loop) = pin./at(loop);
+    Pshap_lo(:,loop) = pshaplo.*pgrd./at(loop); 
+    Pshap_hi(:,loop) = pshaphi.*pgrd./at(loop); 
 end
+
+% integrate over time
+[Frs,RX] = compute_timeintegrated_prs(Rx,Prs,times); 
+[Fin] = compute_timeintegrated_prs(Rx,Pin,times); 
+[Fshap_lo] = compute_timeintegrated_prs(Rx,Pshap_lo,times); 
+[Fshap_hi] = compute_timeintegrated_prs(Rx,Pshap_hi,times); 
+
+% convert the pdf to magnitude
+[mx,fMx] = rspdf2mwpdf(RX, Frs, dtau, c);
+[~,fin] = rspdf2mwpdf(RX, Fin, dtau, c);
+[~,fshap_lo] = rspdf2mwpdf(RX, Fshap_lo, dtau, c);
+[~,fshap_hi] = rspdf2mwpdf(RX, Fshap_hi, dtau, c);
+
+% normalize and plot
+Prs_norm = Prs./repmat(max(Prs), size(Prs, 1), 1); 
+Rxm = rs2mw(Rx); 
+cs = varycolor(length(days2plot)); 
+fMx_norm = fMx./max(fMx); 
+fMx_norm(1) = []; 
+fMx_norm = [fMx_norm; 0]; 
+semilogy(mx, fMx_norm, 'color', cs(oloop,:))
+hold on
+ylim([1e-4, 1])
+xlim([0.5, ceil(max(mx))])
+
+
 y = 10.^(-b*mx); 
 y= y(:)./max(y);
 semilogy(mx, y, '--k')

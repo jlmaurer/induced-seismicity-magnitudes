@@ -108,3 +108,4 @@ plot(t_mc_10, Mlo, ':k', t_mc_10, Mhi, ':k')
 legend('Pre shut-in', 'Post shut-in', 'Mmax\_seis (\Delta\tau = 2 MPa)', ...
     'Mmax\_McGarr', 'Mmax\_GRD', 'Mmax\_GRD\_95%\_bounds')
 
+%% TODO: Make Figs. 12-14

@@ -1,4 +1,4 @@
-function [Psl, Psc, Psu] = compute_Ps_Shapiro (rx)
+function [Psl] = Compute_Shapiro_lower (rx)
 % This function returns the geometrical modifying factors from Shapiro et
 % al. (2011, 2013, 2015), by default assuming a uniform distribution on
 % fault size rho. Can be multiplied by GRD to get the corresponding
@@ -17,11 +17,5 @@ function [Psl, Psc, Psu] = compute_Ps_Shapiro (rx)
     t3 = 3*pi*rx/4; 
     t4 = 1.5*rx.*asr; 
     Psl = t1.*t2 - t3 + t4; 
-
-    % second, P_s/P_c = 1
-    Psc = ones(size(Psl)); 
-
-    % third, P_s/P_c = 1/P_c
-    Psu = 1 + 3*(rx.^2)/2 + (3*pi*rx/4); 
 
 end

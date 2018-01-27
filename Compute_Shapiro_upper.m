@@ -1,6 +1,7 @@
-function [Prs_shapiro_hi] = Compute_Shapiro_upper(rho_min, rho_max, Nx)
+function [Prs_shapiro_hi, rx] = Compute_Shapiro_upper(rho_min, rho_max, Nx)
 % this function returns the probability corresponding to the upper
-% end-member model of Shapiro et al. (2011, 2013, Shapiro 2015). 
+% end-member model of Shapiro et al. (2011, 2013, Shapiro 2015). It is
+% required for this fcn that rho_min and rho_max are normalized by a(t). 
 
     if nargin < 3
         Nx = 200; 

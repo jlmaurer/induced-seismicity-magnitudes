@@ -2,6 +2,9 @@ function [frs, Frs] = computeGRD(rstest, b, rmin)
 % computeGRD: This function computes the probability of an r_s-sized source
 % based on the GRD with b given.
 
+    if nargin < 3
+        rmin = min(rstest); 
+    end
     ind = rstest < rmin; 
     
     alpha = (2*b);   
@@ -9,4 +12,6 @@ function [frs, Frs] = computeGRD(rstest, b, rmin)
     frs = exp(lf); 
     frs(ind) = 0; 
     Frs = 1 - ((rstest./rmin).^(-alpha)); 
+    frs = frs(:); 
+    Frs = Frs(:); 
 end

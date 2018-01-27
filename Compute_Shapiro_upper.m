@@ -6,7 +6,12 @@ function [Prs_shapiro_hi] = Compute_Shapiro_upper(rho_min, rho_max, Nx)
         Nx = 200; 
     end
     
-    rx = linspace(rho_min, rho_max, Nx); 
+    if numel(Nx)==1
+        rx = linspace(rho_min, rho_max, Nx); 
+    else
+        rx = Nx; 
+    end
+    
     % third, P_s/P_c = 1/P_c
     Prs_shapiro_hi = 1 + 3*(rx.^2)/2 + (3*pi*rx/4); 
     Prs_shapiro_hi = Prs_shapiro_hi(:); 

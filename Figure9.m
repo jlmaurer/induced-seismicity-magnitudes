@@ -46,8 +46,9 @@ end
 % Shapiro upper end-member model
 rmin_full = mw2rs(Mc, dtau, c); 
 rmax_full = mw2rs(Mmax, dtau, c); 
-pshaphi = Compute_Shapiro_upper(rmin_full, rmax_full, Nx); 
-Pshap_hi = pshaphi.*computeGRD(mw2rs(mx, dtau, c), b, rmin_full); 
+mws_full = mw2rs(mx, dtau, c); 
+pshaphi = Compute_Shapiro_upper(rmin_full, rmax_full, mws_full(:)); 
+Pshap_hi = pshaphi.*computeGRD(mws_full(:), b, rmin_full); 
 [~,fshap_hi] = rspdf2mwpdf(RX, Pshap_hi, dtau, c);
 
 % GRD

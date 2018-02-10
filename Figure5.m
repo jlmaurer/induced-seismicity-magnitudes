@@ -10,7 +10,7 @@ b = 1;
 Nx = 1000; 
 
 % Compute the analytical expression
-[ Prs, rx, Frs,Pin, Pp, Pr] = Compute_Prs_num (maxrho/a,minrho/a, b,Nx);
+[ Prs, rx, Frs,Pin, Pp, Pr] = Compute_Prs_num(maxrho/a,minrho/a, b,Nx);
 
 % Plot the individual contribution
 figure; 
@@ -23,6 +23,7 @@ xlabel('Normalized Fault Size')
 ylabel('Relative Frequency')
 legend('P_{in}', 'P_p', 'P_r', 'a(t)')
 title('Components of P(r_s)')
+axis tight
 
 % Plot the full solution and compare to Segall & Lu, 2015
 figure; 
@@ -34,3 +35,4 @@ xlabel('M_W')
 ylabel('Relative Frequency')
 legend('Maurer-Segall 2017', 'Segall-Lu 2015', 'a(t)')
 title('Comparing Maurer & Segall 2017 to Segall & Lu 2015')
+axis tight

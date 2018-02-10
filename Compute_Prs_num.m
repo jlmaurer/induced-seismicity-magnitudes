@@ -12,7 +12,7 @@ function [ Prs, rx, Frs,Pin, Pp, Pr] = Compute_Prs_num (b,minrho,maxrho, Nx)
     % rx - r_s values to evaluate
     rx = logspace(log10(minrho), log10(min(1,maxrho)), Nx+1);  
     rx(end) = []; 
-    fgrd= frho(rx); 
+    fgrd= frho(rx)'; 
     zc = sqrt(1 - rx.^2); 
 
     % Pin
@@ -52,7 +52,7 @@ function [ Prs, rx, Frs,Pin, Pp, Pr] = Compute_Prs_num (b,minrho,maxrho, Nx)
                 ind = rhos > gamma;
                 geom_term_Pp = acos(gamma) + (2*rhos(ind)-3*gamma).*zgam; 
                 if sum(ind) > 1
-                    Pp(k) = trapz(rhos(ind), geom_term_Pp.*rhogrd(ind)); 
+                    Pp(k) = trapz(rhos(ind), geom_term_Pp(:).*rhogrd(ind)); 
                 else
                     Pp(k) = 0; 
                 end

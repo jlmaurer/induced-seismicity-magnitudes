@@ -64,5 +64,6 @@ ylabel('Mmax')
 legend('Mean', 'Lower 95% bound', 'Upper 95% bound', 'Observed', 'Pre shut-in', 'Post shut-in')
 xlim([min(bvals), max(bvals)])
 set(gca, 'FontSize', 16)
+title('Estimated b-values and Mmax pre- and post- shut-in, Basel')
 
 

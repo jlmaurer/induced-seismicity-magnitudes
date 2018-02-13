@@ -9,11 +9,22 @@ minrho = mw2rs(0.5);
 b = 1;
 Nx = 1000; 
 
-% Compute the analytical expression
+%% Simulate events numerically
+M = 5e6;                    % number of simulations
+genrho = @(rhomax,rhomin, b) genRsGR(rhomax,rhomin, b); 
+[rsin,rsp1,rsp2, rsr, rho] = SimEq3D(M, genrho, maxrho/a, minrho/a, 1, b); 
+
+% combine events
+rs = [rsin(:); rsp1(:);rsp2(:); rsr(:)]; 
+rs = rs.*a; 
+Mws = rs2mw(rs, deltatau); 
+[hm, xm] = hist(Mws, 35); 
+
+%% Compute the analytical expressions
 [ Prs, rx, Frs] = Compute_Prs(b, minrho/a,maxrho/a, Nx);
 [Pin] = Compute_Pin(rx, a);
 
-% Plot the individual contribution
+%% Plot the results
 figure; 
 loglog(rx.*a, Pin./a, 'b')
 hold on

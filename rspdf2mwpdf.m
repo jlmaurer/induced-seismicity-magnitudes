@@ -2,6 +2,10 @@ function [mws, fMw] = rspdf2mwpdf(rs, frs, dtau, c)
 % this function converts from the function on rs to the function on
 % magnitude
 
+    if nargin < 4
+        c = 7*pi/16;
+    end
+
     mws = rs2mw(rs, dtau, c);  
     ex = .5*(mws(:) + 6.03); 
     numer = log(10)/2; 

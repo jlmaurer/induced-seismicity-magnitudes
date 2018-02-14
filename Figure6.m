@@ -1,12 +1,15 @@
-%% Script to generate figures from Maurer & Segall, Fig. 5
+%% Script to generate plots from Maurer & Segall, Fig. 5
+clear
 
-% pick a(t), rho_max
-a = 2500;           % 250 or 2500 m
+%% Pick parameter values
+a = 250;           % 250 or 2500 m
 maxrho = 1500;      % 500 or 1500 m
 
 % other parameters
-minrho = mw2rs(0.5); 
+Mwmin = 0.5; 
+minrho = mw2rs(Mwmin); 
 b = 1;
+dtau = 3e6; 
 Nx = 1000; 
 
 %% Simulate events numerically
@@ -15,35 +18,42 @@ genrho = @(rhomax,rhomin, b) genRsGR(rhomax,rhomin, b);
 [rsin,rsp1,rsp2, rsr, rho] = SimEq3D(M, genrho, maxrho/a, minrho/a, 1, b); 
 
 % combine events
-rs = [rsin(:); rsp1(:);rsp2(:); rsr(:)]; 
-rs = rs.*a; 
-Mws = rs2mw(rs, deltatau); 
-[hm, xm] = hist(Mws, 35); 
+xlocs = linspace(Mwmin, rs2mw(maxrho, dtau), 100); 
+rs = [rsin(:); rsp1(:);rsp2(:); rsr(:)].*a; 
+Mws = rs2mw(rs, dtau); 
+[hm, xm] = hist(Mws, xlocs); 
+ya = trapz(xm, hm); 
+hm = hm./ya; 
+
+Mw_pin = rs2mw(rsin(:).*a, dtau); 
+[hm_pin, xm_pin] = hist(Mw_pin, xlocs); 
+ya = trapz(xm_pin, hm_pin); 
+hm_pin = hm_pin./ya; 
 
 %% Compute the analytical expressions
 [ Prs, rx, Frs] = Compute_Prs(b, minrho/a,maxrho/a, Nx);
-[Pin] = Compute_Pin(rx, a);
+[Pin] = Compute_Pin(rx)./a;
+rx = rx.*a; 
+Prs = Prs./a; 
+[mwx,fMw] = rspdf2mwpdf(rx, Prs, dtau);
+Pin_full = Pin.*computeGRD(rx, b, minrho);
+[~,fPin] = rspdf2mwpdf(rx, Pin_full, dtau);
+ya = trapz(mwx, fPin); 
+fPin = fPin./ya; 
 
 %% Plot the results
-figure; 
-loglog(rx.*a, Pin./a, 'b')
-hold on
-loglog(rx.*a, Prs./a, ':', 'LineWidth', 2)
-plot([a, a], [min([Pp(:); Pin(:)]./a), max([Pp(:); Pin(:)]./a)])
-xlabel('Normalized Fault Size')
-ylabel('Relative Frequency')
-legend('P_{in}', 'P_p', 'P_r', 'a(t)')
-title('Components of P(r_s)')
-axis tight
+mwa = rs2mw(a, dtau); 
 
-% Plot the full solution and compare to Segall & Lu, 2015
 figure; 
-loglog(rx.*a, Prs./a)
+semilogy(mwx, fPin./max(fPin), 'g')
 hold on
-loglog(rx.*a, Pin./a, '--')
-plot([a, a], [min([Prs(:); Pin(:)]./a), max([Prs(:); Pin(:)]./a)])
+semilogy(mwx, fMw./max(fMw), ':r', 'LineWidth', 2)
+semilogy(xm, hm./max(hm), 'or')
+semilogy(xm_pin, hm_pin./max(hm_pin), 'dr')
+vline(mwa);
 xlabel('M_W')
-ylabel('Relative Frequency')
-legend('Maurer-Segall 2017', 'Segall-Lu 2015', 'a(t)')
-title('Comparing Maurer & Segall 2017 to Segall & Lu 2015')
+ylabel('Normalized Frequency')
+legend('P_{in} - Theoretical', 'P(r_s) - Theoretical', 'P_{in} - Numerical', ...
+    'P(r_s) - Numerical', 'M_W(a(t))', 'Location', 'Southwest')
+title('Components of P(r_s)')
 axis tight

@@ -5,7 +5,7 @@ function [ Prs, rx, Frs,Pin, Pp, Pr] = Compute_Prs_num (b,minrho,maxrho, Nx)
 % a. 
    
     % rhos to integrate over
-    rhos = logspace(log10(minrho), log10(maxrho), 2*Nx);
+    rhos = logspace(log10(minrho), log10(maxrho), 2*Nx)';
     frho = @(x) computeGRD(x, b, minrho); 
     rhogrd = frho(rhos); 
     
@@ -34,7 +34,7 @@ function [ Prs, rx, Frs,Pin, Pp, Pr] = Compute_Prs_num (b,minrho,maxrho, Nx)
                 zgam = zc(k); 
                 ind = rhos >= gamma;
                 geom_term_Pp = acos(gamma) + (2*rhos(ind)-3*gamma).*zgam; 
-                Pp(k) = trapz(rhos(ind), geom_term_Pp.*rhogrd(ind)); 
+                Pp(k) = trapz(rhos(ind), geom_term_Pp(:).*rhogrd(ind)); 
     
                 % P_r
                 geom_term_Pr = (rhos(ind) - gamma).^2; 

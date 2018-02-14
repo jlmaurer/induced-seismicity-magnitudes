@@ -5,7 +5,7 @@ function [frs, Frs] = computeGRD(rstest, b, rmin)
     if nargin < 3
         rmin = min(rstest); 
     end
-    ind = rstest < rmin; 
+    ind = round(rstest, 5) < round(rmin, 5); 
     
     alpha = (2*b);   
     lf = log(alpha) + alpha*log(rmin) - (alpha+1)*log(rstest); 

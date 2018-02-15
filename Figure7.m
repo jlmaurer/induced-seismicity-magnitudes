@@ -7,7 +7,7 @@ clear
 c = 0.01;
 
 % seismicity parameters
-Mwmax = 4;
+Mwmax = 4.5;
 Mwmin = 0.5;
 b = 1;
 dtau = 3e6;
@@ -16,7 +16,7 @@ dtau = 3e6;
 tdays = [1, 4:4:150];
 nsec = 24*3600;
 ts = tdays*nsec;
-at = sqrt(c*ts);
+at = 10 + 2*sqrt(c*ts);
 
 %% Compute P(r_s) for each a(t)
 Nx = 300; 
@@ -47,7 +47,7 @@ for loop = 1:Nt
 end
 
 %% Plot results
-MX = mx(:,end); 
+MX = linspace(Mwmin, Mwmax); 
 y = 10.^(-b*(MX - Mwmin)); 
 cs = varycolor(length(tdays)); 
 ymin = 1e-5; 
@@ -143,6 +143,7 @@ semilogy(MXT1, fMx_norm1)
 hold on
 semilogy(MXT2, fMx_norm2)
 semilogy(MXT3, fMx_norm3)
+semilogy(MX, y, 'k--')
 xlabel('M_W')
 legend('Pin', 'Pp+Pin', 'Prs')
 xlim([Mwmin, Mwmax])
